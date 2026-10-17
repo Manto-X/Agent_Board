@@ -4,10 +4,10 @@ Agents_Board Zero-Install Bootstrap Installer
 One-line command to install or update Agents_Board in any existing or new project:
 
 Linux / macOS:
-  curl -fsSL https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python3
+  curl -fsSL https://raw.githubusercontent.com/Manto-X/Agent_Board/main/get_board.py | python3
 
 Windows PowerShell:
-  irm https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python
+  irm https://raw.githubusercontent.com/Manto-X/Agent_Board/main/get_board.py | python
 """
 
 import io
@@ -18,7 +18,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-REPO_ZIP_URL = "https://github.com/tomyxo/Agents_Board/archive/refs/heads/main.zip"
+REPO_ZIP_URL = "https://github.com/Manto-X/Agent_Board/archive/refs/heads/main.zip"
 
 
 def bootstrap(target_dir: Path | None = None) -> None:
@@ -35,7 +35,7 @@ def bootstrap(target_dir: Path | None = None) -> None:
             zip_bytes = resp.read()
     except Exception as e:
         print(f"❌ Failed to download repository archive: {e}")
-        print("💡 Hint: You can also clone the repository directly with: git clone https://github.com/tomyxo/Agents_Board.git")
+        print("💡 Hint: You can also clone the repository directly with: git clone https://github.com/Manto-X/Agent_Board.git")
         sys.exit(1)
 
     print("📦 Extracting .agents engine and configuration files...")

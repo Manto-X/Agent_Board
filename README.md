@@ -30,7 +30,7 @@ Tưởng tượng trong nhà anh em có một **Cái bảng dán giấy nhớ tr
 
 ## 💎 Điểm độc đáo của Agent Board (So với các repo khác trên mạng)
 
-| Tiêu chí | Các công cụ khác (`CrewAI`, `Kanbots`, `AutoGen`) | **Agent Board** 🧭 |
+| Tiêu chí | Các công cụ khác | **Agent Board** 🧭 |
 | :--- | :--- | :--- |
 | **Cài đặt** | Cài Node.js, Docker, Electron, hoặc cả chục thư viện pip nặng nề. | **Zero-Install:** 100% Python Standard Library có sẵn trong máy. Tải về là chạy ngay. |
 | **Chi phí dùng AI** | Bắt mua API key trả tiền theo lượt (đốt token cực xót ruột). | **0 đồng phí phát sinh:** Tận dụng 100% tài khoản ChatGPT, Claude, Gemini đã mua hàng tháng. |
@@ -47,12 +47,12 @@ Chạy ngay dòng lệnh này tại thư mục dự án của anh em:
 
 * **Windows PowerShell:**
   ```powershell
-  irm https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python
+  irm https://raw.githubusercontent.com/Manto-X/Agent_Board/main/get_board.py | python
   ```
 
 * **Linux / macOS:**
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python3
+  curl -fsSL https://raw.githubusercontent.com/Manto-X/Agent_Board/main/get_board.py | python3
   ```
 
 ---
@@ -89,6 +89,10 @@ python .agents/board.py watch                          # Bật chuông theo dõi
 - 📖 [Bảng tra cứu toàn bộ lệnh CLI](docs/CLI_REFERENCE.md)
 
 ---
+
+> 💡 **Lời nhắn gửi:** Agent Board chủ động giữ vững triết lý tối giản nhất trong việc kết nối, giao tiếp và phân việc giữa các AI. Anh chị em toàn quyền tự do nâng cấp, mở rộng lên các mức độ cao hơn (custom hooks, dynamic dispatcher, automated git worktrees, web dashboard...) để phục vụ tối đa nhu cầu cá nhân của bản thân.
+
+---
 ---
 
 # 🇬🇧 English
@@ -114,7 +118,7 @@ Your desktop AI models coordinate through the local filesystem. You sip your cof
 
 ## 💎 Why Agent Board Stands Out
 
-| Feature | Typical Multi-Agent Tools (`CrewAI`, `Kanbots`, `AutoGen`) | **Agent Board** 🧭 |
+| Feature | Typical Multi-Agent Tools | **Agent Board** 🧭 |
 | :--- | :--- | :--- |
 | **Installation** | Heavy setups: Node.js, Docker, Electron, or bulky pip packages. | **Zero-Install:** 100% Python Standard Library. Clone and run immediately. |
 | **Token Cost** | Pay-per-token API calls (costs multiply rapidly). | **$0 Extra Cost:** Uses 100% of your flat-rate Claude Code, ChatGPT, and Gemini desktop subs. |
@@ -131,12 +135,12 @@ Run this directly inside your project directory:
 
 * **Windows PowerShell:**
   ```powershell
-  irm https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python
+  irm https://raw.githubusercontent.com/Manto-X/Agent_Board/main/get_board.py | python
   ```
 
 * **Linux / macOS:**
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python3
+  curl -fsSL https://raw.githubusercontent.com/Manto-X/Agent_Board/main/get_board.py | python3
   ```
 
 ---
@@ -171,3 +175,7 @@ python .agents/board.py watch                          # Run background audible 
 - 📐 [Architecture & Relay Baton Protocol](docs/ARCHITECTURE.md)
 - 🔄 [4-Phase Practical Collaboration Workflow](docs/WORKFLOW.md)
 - 📖 [Complete CLI Command Reference](docs/CLI_REFERENCE.md)
+
+---
+
+> 💡 **Philosophy Note:** Agent Board deliberately embraces a minimalist philosophy for inter-agent communication and task coordination. You are fully empowered to fork, extend, and level it up (custom hooks, dynamic dispatchers, web dashboards, automated git worktrees...) to best fit your personal workflows.

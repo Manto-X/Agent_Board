@@ -4,3 +4,8 @@ __pycache__/
 *.tmp
 .DS_Store
 scratch/
+
+# Local test scratchpads
+test.py
+test_*.py
+test_*.tmp
