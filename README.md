@@ -1,110 +1,103 @@
 # Agents_Board 🧭
 
-> **Bảng tin điều phối đa tác tử (Multi-Agent Blackboard System) trên Filesystem.**
+> **Bảng tin điều phối đa tác tử (Multi-Agent Blackboard System) cho Filesystem.**  
 > Kết nối độc lập **Claude Code**, **OpenAI Codex**, và **Antigravity / Gemini** qua các cửa sổ làm việc mà không tốn phí Multi-Agent API framework.
 
 ---
 
-## 🎯 Ý tưởng & Triết lý cốt lõi
+## 🎯 Triết lý & Thiết kế cốt lõi
 
-1. **Zero Multi-Agent API Overhead:** Tận dụng 100% gói thuê bao phẳng (flat-rate sub) sẵn có của các CLI/IDE (Claude Code, ChatGPT/Codex, Antigravity) thay vì đốt token theo lượt qua CrewAI/AutoGen.
-2. **Blackboard Pattern (Bảng tin chung):** Thư mục `.agents/` là nguồn sự thật duy nhất (Single Source of Truth) theo dõi tiến độ, task và spec.
-3. **Gậy tiếp sức (Baton Pass / Semaphore):** File `.agents/BATON.json` kiểm soát ai là người được quyền hành động, triệt tiêu race condition.
-4. **Cầu chì tự ngắt (Circuit Breaker):** Giới hạn tối đa 2 lần từ chối (`reject_count >= 2`). Chống kẹt vòng lặp bóng bàn giữa Mason và Reviewer.
-5. **Đồng bộ vai trò tự nhiên (Natural Role Ingestion):** Tự sinh `CLAUDE.md`, `CODEX.md`, `AGENTS.md` từ `.agents/roster/` để mỗi agent tự động nhận vai khi khởi động.
-
----
-
-## 📂 Cấu trúc thư mục `.agents/`
-
-```text
-.agents/
-├── 00_specs/          # Hồ sơ yêu cầu, PRD, tài liệu kiến trúc do Orchestrator tạo
-├── 01_backlog/        # Danh sách task chờ làm (dạng Markdown + Frontmatter)
-├── 02_in_progress/    # Task đang được Mason thực thi
-├── 03_review/         # Task đang chờ Reviewer thẩm định
-├── 04_done/           # Task đã hoàn thành và nghiệm thu
-├── 05_escalation/     # Task bị kẹt sau 2 lần từ chối -> chờ phán quyết
-├── roster/            # Hồ sơ phân vai (orchestrator.md, mason.md, reviewer.md)
-└── BATON.json         # Token gậy tiếp sức thời gian thực
-```
+1. **Zero-Install & Zero-Dependency:** 100% Python Standard Library (3.10+). Không cần `pip install`, không tốn chi phí framework (AutoGen/CrewAI).
+2. **Cách ly tuyệt đối (Workspace Isolation):** Toàn bộ bộ máy của AIs nằm trọn trong thư mục `.agents/`. Root project hoàn toàn sạch bóng để dành cho mã nguồn (`src/`), bài test (`tests/`) và kịch bản (`scripts/`) của người dùng.
+3. **Lệnh ngắn dễ nhớ (Short Dispatcher):** Thao tác nhanh qua `python .agents/board.py <cmd>`.
+4. **Ma trận phân vai linh hoạt (Dynamic Role Matrix):** Tự do tráo đổi vai trò giữa các AI (ví dụ: Claude làm Orchestrator, Antigravity làm Mason, Codex làm Reviewer).
+5. **Gậy tiếp sức (Baton Pass) & Cầu chì (Circuit Breaker):** Kiểm soát chống race condition và tự ngắt sang `05_escalation` khi task bị reject quá 2 lần.
 
 ---
 
-## 🚀 Hướng dẫn sử dụng nhanh (Quick Start)
+## 🚀 Khởi động nhanh (Quick Start)
 
-### 1. Khởi tạo Agents_Board
-Trong thư mục dự án bất kỳ:
+### Kịch bản 1: Kéo Starter Kit vào dự án có sẵn (1 Dòng lệnh)
+
+Chạy trực tiếp từ terminal tại thư mục dự án của bạn:
+
+* **Windows PowerShell:**
+  ```powershell
+  irm https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python
+  ```
+* **Linux / macOS:**
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python3
+  ```
+
+### Kịch bản 2: Dự án mới từ đầu
+Dùng tính năng **"Use this template"** trên GitHub repo hoặc clone về máy:
 ```bash
-python -m agents_board.init
+git clone https://github.com/tomyxo/Agents_Board.git my-project
+cd my-project
+python .agents/board.py init
 ```
-Lệnh này sẽ tự sinh cấu trúc `.agents/`, bộ vai trò mẫu, template task và các file `CLAUDE.md`, `CODEX.md`, `AGENTS.md`.
-
-### 2. Bật Trọng tài giám sát (Watcher Daemon)
-Chạy script này ở một tab terminal riêng (chỉ tốn 0% CPU, 0 LLM token):
-```bash
-python -m agents_board.watcher
-```
-Watcher sẽ lắng nghe sự kiện, phát chuông (beep) và in log đổi trạng thái thời gian thực.
 
 ---
 
-## 🛠️ Bộ lệnh CLI (Cheat Sheet)
+## 🎭 Tùy biến Vai trò (Dynamic Roles)
+
+Mặc định: `Antigravity` = Orchestrator, `Claude` = Mason, `Codex` = Reviewer.  
+Bạn có thể tráo đổi bất kỳ lúc nào:
+
+```bash
+# Cho Claude lập kế hoạch, Antigravity viết code, Codex review:
+python .agents/board.py roster --orchestrator claude --mason antigravity --reviewer codex
+```
+Lệnh trên sẽ tự động nạp vai trò tương ứng vào [CLAUDE.md](file:///e:/gDrive/03_Lab/Agents_Board/CLAUDE.md), [AGENTS.md](file:///e:/gDrive/03_Lab/Agents_Board/AGENTS.md), [CODEX.md](file:///e:/gDrive/03_Lab/Agents_Board/CODEX.md).
+
+---
+
+## 🛠️ Bộ lệnh điều phối (Cheat Sheet)
 
 ### 🏃 Quản lý Gậy tiếp sức (Baton)
 ```bash
 # Xem ai đang cầm gậy
-python -m agents_board.baton status
+python .agents/board.py baton status
 
-# Chuyển gậy cho Mason
-python -m agents_board.baton pass mason --task-id TASK-01 --action "implementing"
+# Chuyển gậy cho Mason làm việc
+python .agents/board.py baton pass mason --task-id TASK-01
 
-# Chuyển gậy cho Reviewer
-python -m agents_board.baton pass reviewer --task-id TASK-01 --action "reviewing"
+# Chuyển gậy cho Reviewer thẩm định
+python .agents/board.py baton pass reviewer --task-id TASK-01
 
-# Khôi phục gậy về cho Orchestrator (khi khẩn cấp)
-python -m agents_board.baton recover
+# Khôi phục gậy về cho Orchestrator (khẩn cấp)
+python .agents/board.py baton recover
 ```
 
 ### 📋 Quản lý Task & Vòng đời
 ```bash
-# 1. Tạo task mới vào backlog
-python -m agents_board.task create --id TASK-01 --title "Xây dựng Auth Module" --assignee mason --reviewer reviewer
+# 1. Xem danh sách bảng Kanban
+python .agents/board.py task list
 
-# 2. Xem toàn cảnh bảng Kanban
-python -m agents_board.task list
+# 2. Tạo task mới
+python .agents/board.py task create --id TASK-01 --title "Xây dựng Auth Module" --assignee mason --reviewer reviewer
 
-# 3. Chuyển task sang đang làm (in_progress)
-python -m agents_board.task move TASK-01 in_progress
+# 3. Chuyển trạng thái task
+python .agents/board.py task move TASK-01 in_progress
+python .agents/board.py task move TASK-01 review
+python .agents/board.py task move TASK-01 done
 
-# 4. Mason code xong, chuyển sang review
-python -m agents_board.task move TASK-01 review
-python -m agents_board.baton pass reviewer --task-id TASK-01
-
-# 5. Reviewer duyệt PASS -> chuyển sang done
-python -m agents_board.task move TASK-01 done
-python -m agents_board.baton pass orchestrator
-
-# 6. Reviewer từ chối (REJECT)
-# Lưu ý: Bắt buộc chỉ rõ lý do và độ nghiêm trọng
-python -m agents_board.task reject TASK-01 --reason "Tạch unit test biên null" --severity BLOCKER --test-file "tests/test_auth.py"
+# 4. Reviewer từ chối (REJECT) kèm lý do
+python .agents/board.py task reject TASK-01 --reason "Tạch unit test biên null" --severity BLOCKER --test-file "tests/test_auth.py"
 ```
 
-> **Cơ chế Cầu chì (Circuit Breaker):**
-> - Lần từ chối 1 (`reject_count = 1`): Task tự động quay về `02_in_progress`, gậy chuyển về `mason` để fix.
-> - Lần từ chối 2 (`reject_count = 2`): Cầu chì ngắt, task tự động nhảy sang `05_escalation/`, gậy chuyển về `orchestrator` hoặc Sếp để phân xử!
-
-### 🎭 Đồng bộ vai trò (Roster Sync)
-Sau khi chỉnh sửa các tiêu chuẩn trong `.agents/roster/*.md`:
+### 🔔 Bật Trọng tài giám sát (Watcher Daemon)
+Chạy ở 1 tab terminal riêng (0% CPU, 0 token LLM):
 ```bash
-python -m agents_board.roster --sync
+python .agents/board.py watch
 ```
 
 ---
 
-## 🧪 Chạy Kiểm thử (Unit Tests)
+## 🧪 Kiểm thử (Unit Tests)
 
 ```bash
 python -m unittest tests/test_agents_board.py
 ```
-Kiểm thử 100% các luồng: Khởi tạo, luân chuyển task, từ chối NITPICK vs BLOCKER, và ngắt cầu chì tự động.
+100% tests pass bằng Python Standard Library.

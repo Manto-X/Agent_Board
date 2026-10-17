@@ -1,4 +1,4 @@
-# Kế hoạch triển khai: Agents_Board Toolkit
+# SPEC-00: Kiến trúc Agents_Board Toolkit
 
 ## Background & Problem Statement (Bối cảnh & Vấn đề)
 - **Bối cảnh:** Hiện tại việc phối hợp nhiều AI độc lập (Claude Code, OpenAI Codex, Antigravity/Gemini) thường tốn kém chi phí token nếu dùng multi-agent API (AutoGen, CrewAI) hoặc đòi hỏi người dùng (Sếp) phải copy-paste ngữ cảnh thủ công giữa nhiều cửa sổ terminal.
@@ -67,12 +67,6 @@ FUNCTION reject_task(task_id, reason, severity, test_file):
         set_baton(holder=task.assignee, action="fix_bugs", task_id=task_id)
 ```
 
-## Edge Cases (Xử lý trường hợp biên)
-- **Deadlock khi mất Baton:** Nếu `BATON.json` bị mất hoặc corrupt, CLI `baton recover` khôi phục quyền cho `orchestrator`.
-- **Concurrent Writes:** Luôn ghi vào file tạm `.tmp` rồi gọi `os.replace()` để bảo đảm tính nguyên tử (atomic rename).
-- **Thiếu file Spec:** Task tạo ra mà không có file spec hợp lệ sẽ bị từ chối ngay từ khâu tạo task.
-- **Kẹt review không hồi kết:** Circuit breaker giới hạn 2 lần từ chối, tự động đẩy về trọng tài.
-
 ## Setup & Operations (Thiết lập & Vận hành)
 ```text
 +-----------------------------------------------------------------------+
@@ -83,46 +77,9 @@ FUNCTION reject_task(task_id, reason, severity, test_file):
 | [TASK-02]     | [TASK-01]         |               | [TASK-00]         |
 | Spec Auth     | Mason: Claude     |               | Setup Project     |
 +---------------+-------------------+---------------+-------------------+
-| Current Baton: [MASON (Claude Code)] -> Action: implementing TASK-01  |
+| Current Baton: [MASON] -> Action: implementing TASK-01                |
 +-----------------------------------------------------------------------+
 ```
-- Khởi tạo: `python -m agents_board.init`
-- Đồng bộ vai trò: `python -m agents_board.roster --sync`
-- Giám sát nền: `python -m agents_board.watcher`
-
-## Technical Decisions (Quyết định kỹ thuật)
-- **Ngôn ngữ:** Python 3.10+ (Standard Library: `pathlib`, `json`, `argparse`, `sys`, `time`, `shutil`).
-- **Cấu trúc dữ liệu Task:** Markdown file với YAML frontmatter chuẩn.
-- **Cơ chế Baton (Gậy tiếp sức):** Tệp `.agents/BATON.json` đóng vai trò Distributed Lock / Semaphore. Chỉ agent đang giữ Baton mới được kích hoạt hành động.
-- **Đồng bộ vai trò (Roster Sync):** Đọc từ `.agents/roster/*.md` để tự động render ra `CLAUDE.md`, `CODEX.md`, `AGENTS.md` tại root project.
-- **Giám sát thời gian thực (Watcher):** Script Python kiểm tra thay đổi theo chu kỳ (polling nhẹ 1s trên filesystem không tốn token LLM), phát tín hiệu âm thanh và log console.
-
-## File Change Manifest (Danh sách tệp thay đổi (Manifest))
-
-| File Path | Action | Description |
-| :--- | :--- | :--- |
-| `.agents/BATON.json` | CREATE | Trạng thái gậy tiếp sức ban đầu |
-| `.agents/roster/orchestrator.md` | CREATE | Đặc tả vai trò Orchestrator (Antigravity) |
-| `.agents/roster/mason.md` | CREATE | Đặc tả vai trò Mason (Claude Code) |
-| `.agents/roster/reviewer.md` | CREATE | Đặc tả vai trò Reviewer (Codex) |
-| `agents_board/__init__.py` | CREATE | Module init cho Agents_Board |
-| `agents_board/init.py` | CREATE | Lệnh tạo cấu trúc thư mục pipeline và template ban đầu |
-| `agents_board/baton.py` | CREATE | CLI quản lý cấp phát và chuyển giao Baton |
-| `agents_board/task.py` | CREATE | CLI quản lý vòng đời task và ngắt cầu chì |
-| `agents_board/roster.py` | CREATE | CLI đồng bộ vai trò thành file hướng dẫn cho từng agent |
-| `agents_board/watcher.py` | CREATE | Daemon giám sát bảng tin và thông báo sự kiện |
-| `template_task.md` | CREATE | Mẫu chuẩn cho một task ticket |
-| `README.md` | CREATE | Tài liệu hướng dẫn sử dụng nhanh và quy trình vận hành |
-| `tests/test_agents_board.py` | CREATE | Bộ kiểm thử tự động cho toàn bộ core module |
-
-## Verification Criteria (Tiêu chí nghiệm thu)
-
-| ID | Category | Command/Test Scenario | Expected Outcome |
-| :--- | :--- | :--- | :--- |
-| VC-01 | Initialization | `python -m agents_board.init` | Full `.agents/` structure (00 to 05) created cleanly |
-| VC-02 | Baton Management | `python -m agents_board.baton pass mason` | `BATON.json` updated with holder='mason', verified via `status` |
-| VC-03 | Task Lifecycle | Create task -> move to in_progress -> move to review | Task file moves atomically across columns |
-| VC-04 | Circuit Breaker | Reject task 2 times with severity `BLOCKER` | Task moves to `05_escalation/`, alert triggered |
-| VC-05 | Roster Sync | `python -m agents_board.roster --sync` | `CLAUDE.md`, `CODEX.md`, `AGENTS.md` generated at root |
-| VC-06 | Unit Test Suite | `python -m unittest tests/test_agents_board.py` | 100% tests pass cleanly |
-
+- Khởi tạo: `python .agents/board.py init`
+- Đồng bộ vai trò: `python .agents/board.py roster --sync`
+- Giám sát nền: `python .agents/board.py watch`

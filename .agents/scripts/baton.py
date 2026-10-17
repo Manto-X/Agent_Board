@@ -5,11 +5,12 @@ import os
 import sys
 from pathlib import Path
 
-from agents_board.config import AGENTS_DIR, BATON_FILE
+# Sibling import from config
+import config
 
 
 def get_baton(base_dir: Path | None = None) -> dict:
-    baton_path = (base_dir / ".agents" / "BATON.json") if base_dir else BATON_FILE
+    baton_path = (base_dir / ".agents" / "BATON.json") if base_dir else config.BATON_FILE
     if not baton_path.exists():
         return {
             "holder": "orchestrator",
@@ -29,7 +30,7 @@ def set_baton(
     expires_at: str | None = None,
     base_dir: Path | None = None,
 ) -> dict:
-    agents_dir = (base_dir / ".agents") if base_dir else AGENTS_DIR
+    agents_dir = (base_dir / ".agents") if base_dir else config.AGENTS_DIR
     agents_dir.mkdir(parents=True, exist_ok=True)
     baton_path = agents_dir / "BATON.json"
     temp_path = agents_dir / "BATON.json.tmp"
@@ -49,7 +50,7 @@ def set_baton(
     return data
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Agents_Board Baton Manager")
     subparsers = parser.add_subparsers(dest="command")
 
@@ -70,7 +71,7 @@ def main() -> None:
     # Recover
     subparsers.add_parser("recover", help="Force reset baton to orchestrator")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.command == "status" or not args.command:
         baton = get_baton()

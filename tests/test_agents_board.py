@@ -1,20 +1,18 @@
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-from agents_board.baton import get_baton, set_baton
-from agents_board.config import (
-    SEVERITY_BLOCKER,
-    SEVERITY_NITPICK,
-    STAGE_BACKLOG,
-    STAGE_DONE,
-    STAGE_ESCALATION,
-    STAGE_IN_PROGRESS,
-    STAGE_REVIEW,
-)
-from agents_board.init import init_board
-from agents_board.roster import sync_roster_to_agents
-from agents_board.task import (
+# Add .agents/scripts to sys.path
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / ".agents" / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+import config
+from baton import get_baton, set_baton
+from init import init_board
+from roster import sync_roster_to_agents
+from task import (
     create_task,
     find_task,
     list_tasks,
@@ -44,12 +42,33 @@ class TestAgentsBoard(unittest.TestCase):
         self.assertTrue((agents_dir / "05_escalation").exists())
         self.assertTrue((agents_dir / "roster").exists())
         self.assertTrue((agents_dir / "BATON.json").exists())
+        self.assertTrue((agents_dir / "project_config.json").exists())
 
         # Check synced agent files
         self.assertTrue((self.root / "CLAUDE.md").exists())
         self.assertTrue((self.root / "CODEX.md").exists())
         self.assertTrue((self.root / "AGENTS.md").exists())
-        self.assertTrue((self.root / "template_task.md").exists())
+        # Template task must be INSIDE .agents/
+        self.assertTrue((agents_dir / "template_task.md").exists())
+
+    def test_dynamic_role_matrix(self):
+        # Swap roles: Claude is Orchestrator, Antigravity is Mason, Codex is Reviewer
+        init_board(
+            base_dir=self.root,
+            orchestrator="claude",
+            mason="antigravity",
+            reviewer="codex",
+        )
+
+        claude_content = (self.root / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertIn("ORCHESTRATOR", claude_content)
+
+        agents_content = (self.root / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("MASON", agents_content)
+
+        cfg = config.load_project_config(self.root)
+        self.assertEqual(cfg["roles"]["orchestrator"], "claude")
+        self.assertEqual(cfg["roles"]["mason"], "antigravity")
 
     def test_baton_flow(self):
         init_board(base_dir=self.root)
@@ -84,22 +103,22 @@ class TestAgentsBoard(unittest.TestCase):
         self.assertIn("01_backlog", str(task_path))
 
         # 2. Move to in_progress
-        task_path = move_task("TASK-100", STAGE_IN_PROGRESS, base_dir=self.root)
+        task_path = move_task("TASK-100", config.STAGE_IN_PROGRESS, base_dir=self.root)
         self.assertIn("02_in_progress", str(task_path))
-        self.assertFalse((self.root / ".agents" / STAGE_BACKLOG / "TASK-100.md").exists())
+        self.assertFalse((self.root / ".agents" / config.STAGE_BACKLOG / "TASK-100.md").exists())
 
         # 3. Move to review
-        task_path = move_task("TASK-100", STAGE_REVIEW, base_dir=self.root)
+        task_path = move_task("TASK-100", config.STAGE_REVIEW, base_dir=self.root)
         self.assertIn("03_review", str(task_path))
 
         # 4. Move to done
-        task_path = move_task("TASK-100", STAGE_DONE, base_dir=self.root)
+        task_path = move_task("TASK-100", config.STAGE_DONE, base_dir=self.root)
         self.assertIn("04_done", str(task_path))
 
         # 5. Check list
         board = list_tasks(base_dir=self.root)
-        self.assertEqual(len(board[STAGE_DONE]), 1)
-        self.assertEqual(board[STAGE_DONE][0]["id"], "TASK-100")
+        self.assertEqual(len(board[config.STAGE_DONE]), 1)
+        self.assertEqual(board[config.STAGE_DONE][0]["id"], "TASK-100")
 
     def test_nitpick_does_not_reject(self):
         init_board(base_dir=self.root)
@@ -110,13 +129,13 @@ class TestAgentsBoard(unittest.TestCase):
             reviewer="reviewer",
             base_dir=self.root,
         )
-        move_task("TASK-200", STAGE_REVIEW, base_dir=self.root)
+        move_task("TASK-200", config.STAGE_REVIEW, base_dir=self.root)
 
         # Reject as NITPICK
         res = reject_task(
             task_id="TASK-200",
             reason="Variable names could be slightly shorter",
-            severity=SEVERITY_NITPICK,
+            severity=config.SEVERITY_NITPICK,
             base_dir=self.root,
         )
         self.assertEqual(res["status"], "ADVISORY_ONLY")
@@ -139,38 +158,38 @@ class TestAgentsBoard(unittest.TestCase):
             max_rejections=2,
             base_dir=self.root,
         )
-        move_task("TASK-300", STAGE_REVIEW, base_dir=self.root)
+        move_task("TASK-300", config.STAGE_REVIEW, base_dir=self.root)
 
         # Rejection 1
         res1 = reject_task(
             task_id="TASK-300",
             reason="Algorithm fails edge case with empty list",
-            severity=SEVERITY_BLOCKER,
+            severity=config.SEVERITY_BLOCKER,
             test_file="tests/test_edge.py",
             base_dir=self.root,
         )
         self.assertEqual(res1["status"], "REJECTED")
         self.assertEqual(res1["reject_count"], 1)
-        self.assertEqual(res1["stage"], STAGE_IN_PROGRESS)
+        self.assertEqual(res1["stage"], config.STAGE_IN_PROGRESS)
 
         # Check baton given back to mason
         baton = get_baton(base_dir=self.root)
         self.assertEqual(baton["holder"], "mason")
 
         # Mason re-submits to review
-        move_task("TASK-300", STAGE_REVIEW, base_dir=self.root)
+        move_task("TASK-300", config.STAGE_REVIEW, base_dir=self.root)
 
         # Rejection 2 (Circuit breaker trips!)
         res2 = reject_task(
             task_id="TASK-300",
             reason="Still fails when list contains nulls",
-            severity=SEVERITY_BLOCKER,
+            severity=config.SEVERITY_BLOCKER,
             test_file="tests/test_null.py",
             base_dir=self.root,
         )
         self.assertEqual(res2["status"], "CIRCUIT_BREAKER_TRIGGERED")
         self.assertEqual(res2["reject_count"], 2)
-        self.assertEqual(res2["stage"], STAGE_ESCALATION)
+        self.assertEqual(res2["stage"], config.STAGE_ESCALATION)
 
         # Check task moved to 05_escalation
         found = find_task("TASK-300", base_dir=self.root)

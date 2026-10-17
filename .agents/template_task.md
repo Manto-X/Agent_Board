@@ -7,8 +7,8 @@ reviewer: "reviewer"
 spec_ref: "00_specs/SPEC-01.md"
 reject_count: 0
 max_rejections: 2
-created_at: "2026-10-16T00:00:00Z"
-updated_at: "2026-10-16T00:00:00Z"
+created_at: "2026-10-17T00:00:00Z"
+updated_at: "2026-10-17T00:00:00Z"
 ---
 
 # TASK-01: Tên tiêu đề task

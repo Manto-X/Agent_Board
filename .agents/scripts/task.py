@@ -2,27 +2,16 @@ import argparse
 import datetime
 import os
 import re
+import sys
 from pathlib import Path
 
-from agents_board.baton import set_baton
-from agents_board.config import (
-    AGENTS_DIR,
-    DEFAULT_MAX_REJECTIONS,
-    SEVERITY_BLOCKER,
-    SEVERITY_MAJOR,
-    SEVERITY_NITPICK,
-    STAGE_BACKLOG,
-    STAGE_DONE,
-    STAGE_ESCALATION,
-    STAGE_IN_PROGRESS,
-    STAGE_REVIEW,
-    STAGES,
-    VALID_SEVERITIES,
-)
+# Sibling imports from config & baton
+import config
+from baton import set_baton
 
 
 def _get_agents_dir(base_dir: Path | None = None) -> Path:
-    return (base_dir / ".agents") if base_dir else AGENTS_DIR
+    return (base_dir / ".agents") if base_dir else config.AGENTS_DIR
 
 
 def parse_task_file(path: Path) -> tuple[dict, str]:
@@ -72,7 +61,7 @@ def find_task(task_id: str, base_dir: Path | None = None) -> tuple[Path, dict, s
     agents_dir = _get_agents_dir(base_dir)
     filename = f"{task_id}.md"
 
-    for stage in STAGES:
+    for stage in config.STAGES:
         stage_dir = agents_dir / stage
         task_path = stage_dir / filename
         if task_path.exists():
@@ -84,15 +73,15 @@ def find_task(task_id: str, base_dir: Path | None = None) -> tuple[Path, dict, s
 def create_task(
     task_id: str,
     title: str,
-    assignee: str,
-    reviewer: str,
+    assignee: str = "mason",
+    reviewer: str = "reviewer",
     spec_ref: str = "",
     body: str = "",
-    max_rejections: int = DEFAULT_MAX_REJECTIONS,
+    max_rejections: int = config.DEFAULT_MAX_REJECTIONS,
     base_dir: Path | None = None,
 ) -> Path:
     agents_dir = _get_agents_dir(base_dir)
-    target_dir = agents_dir / STAGE_BACKLOG
+    target_dir = agents_dir / config.STAGE_BACKLOG
     target_dir.mkdir(parents=True, exist_ok=True)
     target_path = target_dir / f"{task_id}.md"
 
@@ -100,7 +89,7 @@ def create_task(
     metadata = {
         "id": task_id,
         "title": title,
-        "stage": STAGE_BACKLOG,
+        "stage": config.STAGE_BACKLOG,
         "assignee": assignee,
         "reviewer": reviewer,
         "spec_ref": spec_ref,
@@ -111,7 +100,7 @@ def create_task(
     }
 
     if not body.strip():
-        body = f"# {task_id}: {title}\n\n## Mô tả\n(Chưa có nội dung mô tả)\n"
+        body = f"# {task_id}: {title}\n\n## Mục tiêu\n(Chưa có nội dung mô tả)\n\n## Tiêu chí nghiệm thu (Acceptance Criteria)\n- [ ] Chức năng hoạt động đúng spec\n- [ ] Unit tests pass 100%\n"
 
     write_task_file(target_path, metadata, body)
     return target_path
@@ -119,14 +108,13 @@ def create_task(
 
 def move_task(task_id: str, target_stage: str, base_dir: Path | None = None) -> Path:
     agents_dir = _get_agents_dir(base_dir)
-    # Match short names or full stage names
     matched_stage = None
-    for stage in STAGES:
+    for stage in config.STAGES:
         if target_stage == stage or target_stage in stage:
             matched_stage = stage
             break
     if not matched_stage:
-        raise ValueError(f"Invalid target stage: '{target_stage}'. Valid stages: {STAGES}")
+        raise ValueError(f"Invalid target stage: '{target_stage}'. Valid stages: {config.STAGES}")
 
     found = find_task(task_id, base_dir=base_dir)
     if not found:
@@ -140,7 +128,6 @@ def move_task(task_id: str, target_stage: str, base_dir: Path | None = None) -> 
     metadata["stage"] = matched_stage
     metadata["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-    # If moving between directories, write directly to destination then remove old if different
     write_task_file(destination_path, metadata, body)
     if current_path != destination_path and current_path.exists():
         current_path.unlink()
@@ -151,13 +138,13 @@ def move_task(task_id: str, target_stage: str, base_dir: Path | None = None) -> 
 def reject_task(
     task_id: str,
     reason: str,
-    severity: str = SEVERITY_BLOCKER,
+    severity: str = config.SEVERITY_BLOCKER,
     test_file: str | None = None,
     base_dir: Path | None = None,
 ) -> dict:
     severity = severity.upper()
-    if severity not in VALID_SEVERITIES:
-        raise ValueError(f"Invalid severity '{severity}'. Choose from: {VALID_SEVERITIES}")
+    if severity not in config.VALID_SEVERITIES:
+        raise ValueError(f"Invalid severity '{severity}'. Choose from: {config.VALID_SEVERITIES}")
 
     found = find_task(task_id, base_dir=base_dir)
     if not found:
@@ -165,7 +152,7 @@ def reject_task(
 
     current_path, metadata, body = found
 
-    if severity == SEVERITY_NITPICK:
+    if severity == config.SEVERITY_NITPICK:
         advisory_entry = (
             f"\n\n> [!NOTE] Advisory (NITPICK) - {datetime.datetime.now(datetime.timezone.utc).isoformat()}\n"
             f"> Lý do: {reason}\n"
@@ -180,7 +167,7 @@ def reject_task(
         }
 
     reject_count = int(metadata.get("reject_count", 0)) + 1
-    max_rejections = int(metadata.get("max_rejections", DEFAULT_MAX_REJECTIONS))
+    max_rejections = int(metadata.get("max_rejections", config.DEFAULT_MAX_REJECTIONS))
     metadata["reject_count"] = reject_count
 
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -193,8 +180,8 @@ def reject_task(
     body += rejection_entry
 
     if reject_count >= max_rejections:
-        metadata["stage"] = STAGE_ESCALATION
-        target_path = move_task(task_id, STAGE_ESCALATION, base_dir=base_dir)
+        metadata["stage"] = config.STAGE_ESCALATION
+        target_path = move_task(task_id, config.STAGE_ESCALATION, base_dir=base_dir)
         write_task_file(target_path, metadata, body)
         set_baton(
             holder="orchestrator",
@@ -206,11 +193,11 @@ def reject_task(
             "status": "CIRCUIT_BREAKER_TRIGGERED",
             "message": f"Circuit breaker tripped! Rejection count reached {reject_count}/{max_rejections}. Escalated to orchestrator.",
             "reject_count": reject_count,
-            "stage": STAGE_ESCALATION,
+            "stage": config.STAGE_ESCALATION,
         }
     else:
-        metadata["stage"] = STAGE_IN_PROGRESS
-        target_path = move_task(task_id, STAGE_IN_PROGRESS, base_dir=base_dir)
+        metadata["stage"] = config.STAGE_IN_PROGRESS
+        target_path = move_task(task_id, config.STAGE_IN_PROGRESS, base_dir=base_dir)
         write_task_file(target_path, metadata, body)
         assignee = metadata.get("assignee", "mason")
         set_baton(
@@ -223,24 +210,27 @@ def reject_task(
             "status": "REJECTED",
             "message": f"Task rejected ({reject_count}/{max_rejections}). Returned to assignee '{assignee}' for fixing.",
             "reject_count": reject_count,
-            "stage": STAGE_IN_PROGRESS,
+            "stage": config.STAGE_IN_PROGRESS,
         }
 
 
 def list_tasks(base_dir: Path | None = None) -> dict[str, list[dict]]:
     agents_dir = _get_agents_dir(base_dir)
     board = {}
-    for stage in STAGES:
+    # Kanban task columns: 01_backlog to 05_escalation
+    task_stages = [s for s in config.STAGES if s != config.STAGE_SPECS]
+    for stage in task_stages:
         board[stage] = []
         stage_dir = agents_dir / stage
         if stage_dir.exists():
             for p in sorted(stage_dir.glob("*.md")):
                 meta, _ = parse_task_file(p)
-                board[stage].append(meta)
+                if meta.get("id"):
+                    board[stage].append(meta)
     return board
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Agents_Board Task Management CLI")
     subparsers = parser.add_subparsers(dest="command")
 
@@ -251,7 +241,7 @@ def main() -> None:
     create_p.add_argument("--assignee", default="mason", help="Assigned Agent")
     create_p.add_argument("--reviewer", default="reviewer", help="Reviewing Agent")
     create_p.add_argument("--spec", default="", help="Spec reference path")
-    create_p.add_argument("--max-rejections", type=int, default=DEFAULT_MAX_REJECTIONS)
+    create_p.add_argument("--max-rejections", type=int, default=config.DEFAULT_MAX_REJECTIONS)
 
     # move
     move_p = subparsers.add_parser("move", help="Move task to stage")
@@ -262,7 +252,7 @@ def main() -> None:
     reject_p = subparsers.add_parser("reject", help="Reject task with structured reason")
     reject_p.add_argument("id", help="Task ID")
     reject_p.add_argument("--reason", required=True, help="Failure explanation")
-    reject_p.add_argument("--severity", choices=VALID_SEVERITIES, default=SEVERITY_BLOCKER)
+    reject_p.add_argument("--severity", choices=config.VALID_SEVERITIES, default=config.SEVERITY_BLOCKER)
     reject_p.add_argument("--test-file", default=None, help="Reproduction test file path")
 
     # list
@@ -272,7 +262,7 @@ def main() -> None:
     show_p = subparsers.add_parser("show", help="Show task details")
     show_p.add_argument("id", help="Task ID")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.command == "create":
         p = create_task(

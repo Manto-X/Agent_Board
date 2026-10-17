@@ -1,13 +1,12 @@
 import argparse
-import json
-import os
 import sys
 import time
 from pathlib import Path
 
-from agents_board.baton import get_baton
-from agents_board.config import AGENTS_DIR, BASE_DIR, STAGES
-from agents_board.task import list_tasks
+# Sibling imports from config, baton, task
+import config
+from baton import get_baton
+from task import list_tasks
 
 # ANSI colors
 RESET = "\033[0m"
@@ -85,11 +84,10 @@ def run_watcher(poll_interval: float = 1.0, once: bool = False, base_dir: Path |
                 last_baton = current_baton
 
             # Check Task movements
-            for stage in STAGES:
+            for stage in config.STAGES:
                 cur_list = current_tasks.get(stage, [])
                 old_list = last_tasks.get(stage, [])
 
-                # Tasks added to this stage
                 added = set(cur_list) - set(old_list)
                 if added:
                     ring_bell()
@@ -110,11 +108,11 @@ def run_watcher(poll_interval: float = 1.0, once: bool = False, base_dir: Path |
         print(f"\n{YELLOW}Watcher stopped by user.{RESET}")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Agents_Board Event Watcher")
     parser.add_argument("--interval", type=float, default=1.0, help="Polling interval in seconds")
     parser.add_argument("--once", action="store_true", help="Scan once and exit")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     run_watcher(poll_interval=args.interval, once=args.once)
 
