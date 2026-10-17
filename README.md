@@ -1,27 +1,27 @@
 # AgentRelay 🧭
 
-> **Có bao giờ bạn bực mình vì đã trả tiền thuê mấy "trợ lý thông minh" (như ChatGPT, Claude, Gemini) về làm việc, nhưng suốt ngày bạn vẫn phải đóng vai shipper: cặm cụi copy từng dòng chữ từ cửa sổ này đem sang dán vào cửa sổ kia? Còn nếu để chúng cùng làm một lúc thì đứa này lại xóa mất bài của đứa khác?**
+> **Có bao giờ anh em bực mình vì đã bỏ tiền túi mua đủ món đồ chơi xịn (ChatGPT, Claude, Gemini) về làm việc, nhưng rốt cuộc cả ngày mình vẫn phải làm shipper: cặm cụi copy từng đoạn chữ từ tab này đem sang dán vào tab kia? Đã thế, hễ để mấy đứa cùng mó tay vào một chỗ là đứa này tiện tay xóa sạch bài của đứa khác!**
 
-Dự án này sinh ra để chấm dứt hoàn toàn sự phiền toái đó.
+Cái tool này đẻ ra để trị dứt điểm cái cảnh lắt nhắt đó cho anh em.
 
 ---
 
-### 💡 Nó hoạt động thế nào? (Giải thích cho một đứa trẻ 10 tuổi)
+### 💡 Nó chạy kiểu gì? (Giải thích dễ hiểu như chuyện con nít)
 
-Hãy tưởng tượng bạn đang dán một **Chiếc bảng phân công việc trên cánh tủ lạnh**, kèm theo **Một chiếc gậy đồ chơi**:
+Tưởng tượng trong nhà anh em có một **Cái bảng dán giấy nhớ trên cánh tủ lạnh**, kèm thêm **Một cây gậy chuyền tay**:
 
-1. **Chiếc bảng dán giấy nhớ:** Trên cánh tủ lạnh có kẻ sẵn 4 ô:
-   - *Việc cần làm* ➔ *Đang làm* ➔ *Chờ kiểm tra* ➔ *Đã làm xong*.
-2. **Chiếc gậy chuyền tay:** Trong nhà lúc nào cũng chỉ có duy nhất **một chiếc gậy**. Ai cầm gậy thì người đó mới được chạy lại bàn làm việc. Làm xong việc của mình, bạn đó bóc tờ giấy dán sang ô tiếp theo rồi chuyền gậy cho bạn khác. Nhờ vậy, không bao giờ có chuyện hai bạn lao vào tranh nhau một mẩu giấy hay xóa đè bài của nhau.
-3. **Chuông nhờ người lớn can thiệp:** Nếu bạn kiểm tra bắt bạn làm bài sửa đi sửa lại quá 2 lần, chuông sẽ reo lên để mời bạn (chủ nhà) đứng ra phân xử, tránh cho hai bạn giận dỗi và cãi nhau lòng vòng.
+1. **Cái bảng dán giấy nhớ:** Trên cánh tủ lạnh chia sẵn 4 ngăn:
+   - *Việc cần làm* ➔ *Đang làm* ➔ *Chờ soi lỗi* ➔ *Xong xuôi*.
+2. **Cây gậy chuyền tay:** Cả nhà chỉ có đúng **một cây gậy duy nhất**. Đứa nào ôm gậy thì đứa đó mới được ngồi vào bàn làm việc. Làm xong phần mình thì tự tay bóc tờ giấy dán sang ngăn kế bên, rồi chuyền gậy cho đứa tiếp theo. Tuyệt đối không có chuyện hai ba đứa xông vào tranh nhau một mẩu giấy hay giẫm chân lên nhau.
+3. **Chuông réo phụ huynh:** Nếu đứa soi lỗi bắt đứa làm bài sửa đi sửa lại quá 2 lần, chuông sẽ réo ầm lên để mời anh em (chủ nhà) vào đập bàn phân xử, dẹp ngay trò cãi cùn lòng vòng.
 
-Chỉ đơn giản như vậy: Mọi trợ lý tự nhìn bảng tủ lạnh, tự chuyền gậy cho nhau để hoàn thành trọn vẹn việc của bạn từ đầu đến cuối mà bạn không cần phải copy-paste lấy một lần!
+Đơn giản vậy thôi: Mấy đứa đệ tự nhìn bảng tủ lạnh, tự chuyền gậy cho nhau cày việc từ đầu đến đuôi. Anh em rảnh tay đi pha cốc cà phê uống, khỏi cần nhấc tay copy-paste lấy một lần!
 
 ---
 
 ## 🚀 Cài đặt trong 1 nốt nhạc (1 Dòng lệnh duy nhất)
 
-Chạy trực tiếp dòng lệnh này tại thư mục dự án của bạn (không cần cài thêm bất kỳ phần mềm hay thư viện lạ nào):
+Chạy ngay dòng lệnh này tại thư mục dự án của anh em (khỏi cần cài thêm bất kỳ phần mềm hay thư viện lạ nào):
 
 * **Windows PowerShell:**
   ```powershell
@@ -37,10 +37,10 @@ Chạy trực tiếp dòng lệnh này tại thư mục dự án của bạn (kh
 
 ---
 
-## 🎭 Phân vai theo ý bạn (Dynamic Role Matrix)
+## 🎭 Phân vai theo ý anh em (Dynamic Role Matrix)
 
 Mặc định: **Gemini / Antigravity** lập kế hoạch, **Claude** viết mã nguồn, **Codex** kiểm tra chất lượng.  
-Bạn thích tráo đổi vai trò thế nào cũng được bằng 1 câu lệnh ngắn:
+Thích tráo đổi vai trò thế nào cũng được bằng 1 câu lệnh ngắn:
 
 ```bash
 # Đổi: Cho Claude lập kế hoạch, Gemini viết mã, Codex kiểm tra:
