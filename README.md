@@ -1,103 +1,104 @@
-# Agents_Board 🧭
+# AgentRelay 🧭
 
-> **Bảng tin điều phối đa tác tử (Multi-Agent Blackboard System) cho Filesystem.**  
-> Kết nối độc lập **Claude Code**, **OpenAI Codex**, và **Antigravity / Gemini** qua các cửa sổ làm việc mà không tốn phí Multi-Agent API framework.
+> **Có bao giờ bạn bực mình vì đã trả tiền thuê mấy "trợ lý thông minh" (như ChatGPT, Claude, Gemini) về làm việc, nhưng suốt ngày bạn vẫn phải đóng vai shipper: cặm cụi copy từng dòng chữ từ cửa sổ này đem sang dán vào cửa sổ kia? Còn nếu để chúng cùng làm một lúc thì đứa này lại xóa mất bài của đứa khác?**
 
----
-
-## 🎯 Triết lý & Thiết kế cốt lõi
-
-1. **Zero-Install & Zero-Dependency:** 100% Python Standard Library (3.10+). Không cần `pip install`, không tốn chi phí framework (AutoGen/CrewAI).
-2. **Cách ly tuyệt đối (Workspace Isolation):** Toàn bộ bộ máy của AIs nằm trọn trong thư mục `.agents/`. Root project hoàn toàn sạch bóng để dành cho mã nguồn (`src/`), bài test (`tests/`) và kịch bản (`scripts/`) của người dùng.
-3. **Lệnh ngắn dễ nhớ (Short Dispatcher):** Thao tác nhanh qua `python .agents/board.py <cmd>`.
-4. **Ma trận phân vai linh hoạt (Dynamic Role Matrix):** Tự do tráo đổi vai trò giữa các AI (ví dụ: Claude làm Orchestrator, Antigravity làm Mason, Codex làm Reviewer).
-5. **Gậy tiếp sức (Baton Pass) & Cầu chì (Circuit Breaker):** Kiểm soát chống race condition và tự ngắt sang `05_escalation` khi task bị reject quá 2 lần.
+Dự án này sinh ra để chấm dứt hoàn toàn sự phiền toái đó.
 
 ---
 
-## 🚀 Khởi động nhanh (Quick Start)
+### 💡 Nó hoạt động thế nào? (Giải thích cho một đứa trẻ 10 tuổi)
 
-### Kịch bản 1: Kéo Starter Kit vào dự án có sẵn (1 Dòng lệnh)
+Hãy tưởng tượng bạn đang dán một **Chiếc bảng phân công việc trên cánh tủ lạnh**, kèm theo **Một chiếc gậy đồ chơi**:
 
-Chạy trực tiếp từ terminal tại thư mục dự án của bạn:
+1. **Chiếc bảng dán giấy nhớ:** Trên cánh tủ lạnh có kẻ sẵn 4 ô:
+   - *Việc cần làm* ➔ *Đang làm* ➔ *Chờ kiểm tra* ➔ *Đã làm xong*.
+2. **Chiếc gậy chuyền tay:** Trong nhà lúc nào cũng chỉ có duy nhất **một chiếc gậy**. Ai cầm gậy thì người đó mới được chạy lại bàn làm việc. Làm xong việc của mình, bạn đó bóc tờ giấy dán sang ô tiếp theo rồi chuyền gậy cho bạn khác. Nhờ vậy, không bao giờ có chuyện hai bạn lao vào tranh nhau một mẩu giấy hay xóa đè bài của nhau.
+3. **Chuông nhờ người lớn can thiệp:** Nếu bạn kiểm tra bắt bạn làm bài sửa đi sửa lại quá 2 lần, chuông sẽ reo lên để mời bạn (chủ nhà) đứng ra phân xử, tránh cho hai bạn giận dỗi và cãi nhau lòng vòng.
+
+Chỉ đơn giản như vậy: Mọi trợ lý tự nhìn bảng tủ lạnh, tự chuyền gậy cho nhau để hoàn thành trọn vẹn việc của bạn từ đầu đến cuối mà bạn không cần phải copy-paste lấy một lần!
+
+---
+
+## 🚀 Cài đặt trong 1 nốt nhạc (1 Dòng lệnh duy nhất)
+
+Chạy trực tiếp dòng lệnh này tại thư mục dự án của bạn (không cần cài thêm bất kỳ phần mềm hay thư viện lạ nào):
 
 * **Windows PowerShell:**
   ```powershell
   irm https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python
   ```
+
 * **Linux / macOS:**
   ```bash
   curl -fsSL https://raw.githubusercontent.com/tomyxo/Agents_Board/main/get_board.py | python3
   ```
 
-### Kịch bản 2: Dự án mới từ đầu
-Dùng tính năng **"Use this template"** trên GitHub repo hoặc clone về máy:
-```bash
-git clone https://github.com/tomyxo/Agents_Board.git my-project
-cd my-project
-python .agents/board.py init
-```
+*(Hoặc dùng nút **"Use this template"** trên GitHub để tạo dự án mới toanh).*
 
 ---
 
-## 🎭 Tùy biến Vai trò (Dynamic Roles)
+## 🎭 Phân vai theo ý bạn (Dynamic Role Matrix)
 
-Mặc định: `Antigravity` = Orchestrator, `Claude` = Mason, `Codex` = Reviewer.  
-Bạn có thể tráo đổi bất kỳ lúc nào:
+Mặc định: **Gemini / Antigravity** lập kế hoạch, **Claude** viết mã nguồn, **Codex** kiểm tra chất lượng.  
+Bạn thích tráo đổi vai trò thế nào cũng được bằng 1 câu lệnh ngắn:
 
 ```bash
-# Cho Claude lập kế hoạch, Antigravity viết code, Codex review:
+# Đổi: Cho Claude lập kế hoạch, Gemini viết mã, Codex kiểm tra:
 python .agents/board.py roster --orchestrator claude --mason antigravity --reviewer codex
 ```
-Lệnh trên sẽ tự động nạp vai trò tương ứng vào [CLAUDE.md](file:///e:/gDrive/03_Lab/Agents_Board/CLAUDE.md), [AGENTS.md](file:///e:/gDrive/03_Lab/Agents_Board/AGENTS.md), [CODEX.md](file:///e:/gDrive/03_Lab/Agents_Board/CODEX.md).
+
+Hệ thống sẽ tự động gửi luật chơi chuẩn xác đến từng trợ lý!
 
 ---
 
-## 🛠️ Bộ lệnh điều phối (Cheat Sheet)
+## 🛠️ Bảng lệnh cầm tay (Cheat Sheet)
 
-### 🏃 Quản lý Gậy tiếp sức (Baton)
+Mọi thao tác hàng ngày đều thông qua chiếc điều khiển ngắn gọn `python .agents/board.py`:
+
+### 🏃 Chuyền gậy làm việc
 ```bash
-# Xem ai đang cầm gậy
+# Xem ai đang giữ gậy
 python .agents/board.py baton status
 
-# Chuyển gậy cho Mason làm việc
+# Chuyền gậy cho thợ viết mã
 python .agents/board.py baton pass mason --task-id TASK-01
 
-# Chuyển gậy cho Reviewer thẩm định
+# Chuyền gậy cho người kiểm tra
 python .agents/board.py baton pass reviewer --task-id TASK-01
 
-# Khôi phục gậy về cho Orchestrator (khẩn cấp)
+# Lấy lại gậy khẩn cấp
 python .agents/board.py baton recover
 ```
 
-### 📋 Quản lý Task & Vòng đời
+### 📋 Quản lý Công việc
 ```bash
-# 1. Xem danh sách bảng Kanban
+# Xem toàn bộ bảng việc
 python .agents/board.py task list
 
-# 2. Tạo task mới
-python .agents/board.py task create --id TASK-01 --title "Xây dựng Auth Module" --assignee mason --reviewer reviewer
+# Tạo một việc mới
+python .agents/board.py task create --id TASK-01 --title "Xây dựng trang đăng nhập"
 
-# 3. Chuyển trạng thái task
+# Chuyển việc qua các ô
 python .agents/board.py task move TASK-01 in_progress
 python .agents/board.py task move TASK-01 review
 python .agents/board.py task move TASK-01 done
 
-# 4. Reviewer từ chối (REJECT) kèm lý do
-python .agents/board.py task reject TASK-01 --reason "Tạch unit test biên null" --severity BLOCKER --test-file "tests/test_auth.py"
+# Trả lại bài bắt sửa (kèm lý do cụ thể)
+python .agents/board.py task reject TASK-01 --reason "Chưa kiểm tra trường hợp mật khẩu để trống" --severity BLOCKER
 ```
 
-### 🔔 Bật Trọng tài giám sát (Watcher Daemon)
-Chạy ở 1 tab terminal riêng (0% CPU, 0 token LLM):
+### 🔔 Bật Trọng tài quan sát
+Mở một cửa sổ riêng và để đó (hoàn toàn miễn phí, không tốn tài nguyên):
 ```bash
 python .agents/board.py watch
 ```
+Mỗi khi có ai chuyền gậy hoặc chuyển việc sang ô mới, chuông báo sẽ phát tiếng kêu và thông báo ngay trên màn hình.
 
 ---
 
-## 🧪 Kiểm thử (Unit Tests)
+## 🧪 Kiểm thử tự động
 
 ```bash
 python -m unittest tests/test_agents_board.py
 ```
-100% tests pass bằng Python Standard Library.
+Toàn bộ hệ thống chạy 100% bằng thư viện có sẵn của Python, không phụ thuộc bất kỳ gói cài đặt bên ngoài nào.
