@@ -90,7 +90,7 @@ python .agents/board.py watch                          # Bật chuông theo dõi
 
 ---
 
-> 💡 **Lời nhắn gửi:** Agent Board chủ động giữ vững triết lý tối giản nhất trong việc kết nối, giao tiếp và phân việc giữa các AI. Anh chị em toàn quyền tự do nâng cấp, mở rộng lên các mức độ cao hơn (custom hooks, dynamic dispatcher, automated git worktrees, web dashboard...) để phục vụ tối đa nhu cầu cá nhân của bản thân.
+> 💡 **Lời nhắn gửi:** Agent Board chủ động giữ vững triết lý kiến trúc tối giản nhất trong việc kết nối, giao tiếp và phân việc giữa các AI. Anh chị em toàn quyền tự do nâng cấp, mở rộng lên các mức độ cao hơn (custom hooks, dynamic dispatcher, automated git worktrees, web dashboard...) để phục vụ tối đa nhu cầu cá nhân của bản thân.
 
 ---
 ---
@@ -178,4 +178,4 @@ python .agents/board.py watch                          # Run background audible 
 
 ---
 
-> 💡 **Philosophy Note:** Agent Board deliberately embraces a minimalist philosophy for inter-agent communication and task coordination. You are fully empowered to fork, extend, and level it up (custom hooks, dynamic dispatchers, web dashboards, automated git worktrees...) to best fit your personal workflows.
+> 💡 **Philosophy Note:** Agent Board deliberately embraces a minimalist architecture philosophy for inter-agent communication and task coordination. You are fully empowered to fork, extend, and level it up (custom hooks, dynamic dispatchers, web dashboards, automated git worktrees...) to best fit your personal workflows.
