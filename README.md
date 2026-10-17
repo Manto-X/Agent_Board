@@ -84,7 +84,7 @@ python .agents/board.py watch                          # Bật chuông theo dõi
 ---
 
 ## 📚 Tài liệu chi tiết (Detailed Documentation)
-- 🧭 [Sổ tay vận hành cho Human (Đọc tệp này trước!)](.agents/MANUAL.md)
+- 🧭 [Sổ tay vận hành cho Human (Đọc tệp này trước!)](MANUAL.md)
 - 📐 [Kiến trúc & Cơ chế gậy Baton](docs/ARCHITECTURE.md)
 - 🔄 [Quy trình phối hợp thực chiến 4 bước](docs/WORKFLOW.md)
 - 📖 [Bảng tra cứu toàn bộ lệnh CLI](docs/CLI_REFERENCE.md)
@@ -173,7 +173,7 @@ python .agents/board.py watch                          # Run background audible 
 ---
 
 ## 📚 Deep Dive Documentation
-- 🧭 [Human Operator Guide (Read this first!)](.agents/MANUAL.md)
+- 🧭 [Human Operator Guide (Read this first!)](MANUAL.md)
 - 📐 [Architecture & Relay Baton Protocol](docs/ARCHITECTURE.md)
 - 🔄 [4-Phase Practical Collaboration Workflow](docs/WORKFLOW.md)
 - 📖 [Complete CLI Command Reference](docs/CLI_REFERENCE.md)

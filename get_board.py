@@ -57,15 +57,9 @@ def bootstrap(target_dir: Path | None = None) -> None:
             if not rel_name:
                 continue
 
-            # We extract .agents/ and root configs.
-            # Only copy README.md if target doesn't have one to avoid overwriting existing projects.
-            extract = False
-            if rel_name.startswith(".agents/") or rel_name in ["AGENTS.md", "CLAUDE.md", "CODEX.md"]:
-                extract = True
-            elif rel_name == "README.md" and not (dest / "README.md").exists():
-                extract = True
-
-            if extract:
+            # We extract .agents/ and the 4 root guide files (MANUAL.md for human, 3 for AIs)
+            # We NEVER touch or overwrite project's README.md
+            if rel_name.startswith(".agents/") or rel_name in ["AGENTS.md", "CLAUDE.md", "CODEX.md", "MANUAL.md"]:
                 target_path = dest / rel_name
                 if member.is_dir():
                     target_path.mkdir(parents=True, exist_ok=True)
@@ -83,7 +77,8 @@ def bootstrap(target_dir: Path | None = None) -> None:
     print("""
 ✨ [Agent Board] Zero-Install Kit Ready!
 --------------------------------------------------
-📖 Human Operator Guide: .agents/MANUAL.md (Đọc tệp này trước!)
+📖 Sổ tay Vận hành (Human): MANUAL.md (Mở đọc tệp này trước!)
+📖 Operator Guide (Human) : MANUAL.md (Read this first!)
 --------------------------------------------------
 Quick Commands:
   • Check Baton  : python .agents/board.py baton status
