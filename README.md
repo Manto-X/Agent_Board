@@ -19,6 +19,21 @@ Tưởng tượng trong nhà anh em có một **Cái bảng dán giấy nhớ tr
 
 ---
 
+## 💎 Điểm độc đáo của AgentRelay (So với các repo khác trên mạng)
+
+Nếu anh em từng tìm hiểu các công cụ đa tác tử (Multi-Agent) trên GitHub (như `Kanbots`, `Kandev`, `Blackboard`, hay `CrewAI`), anh em sẽ thấy **AgentRelay** giải quyết bài toán theo cách thực dụng và nhẹ đầu hơn hẳn:
+
+| Tiêu chí | Các công cụ khác trên GitHub (`Kanbots`, `Kandev`, `CrewAI`) | **AgentRelay** 🧭 |
+| :--- | :--- | :--- |
+| **Cài đặt** | Bắt cài đủ thứ: Node.js, Electron, Docker, Rust, hoặc cả chục thư viện pip nặng nề. | **Zero-Install:** 100% Python có sẵn trong máy. Tải về là chạy ngay, không cần `pip install`. |
+| **Chi phí dùng AI** | Bắt mua API key trả tiền theo lượt (đốt tiền rất xót ruột). | **0 đồng phí phát sinh:** Tận dụng 100% tài khoản ChatGPT, Claude, Gemini anh em đã mua hàng tháng. |
+| **Chống đè code** | Dùng Git worktrees phức tạp hoặc dễ bị xung đột khi nhiều đứa cùng sửa. | **Gậy tiếp sức (`BATON.json`):** Đứa nào cầm gậy đứa đó mới được làm. Tuyệt đối không giẫm chân nhau. |
+| **Chống kẹt vòng lặp** | Thợ code và người kiểm tra dễ cãi nhau lòng vòng vô tận (Ping-Pong loop). | **Cầu chì tự ngắt:** Bị từ chối 2 lần là tự ngắt ngay, réo chuông mời anh em vào phân xử. |
+| **Đổi vai trò** | Gắn chết vai hoặc phải sửa code nguồn lằng nhằng. | **1 dòng lệnh đổi vai:** Thích cho Claude lập kế hoạch hay Gemini viết code chỉ mất 3 giây. |
+| **Sạch sẽ thư mục** | Xâm lấn bừa bãi ra thư mục gốc dự án. | **Nhà ai nấy ở:** 100% đồ nghề AI giấu kín trong `.agents/`, trả lại không gian sạch bóng cho dự án của anh em. |
+
+---
+
 ## 🚀 Cài đặt trong 1 nốt nhạc (1 Dòng lệnh duy nhất)
 
 Chạy ngay dòng lệnh này tại thư mục dự án của anh em (khỏi cần cài thêm bất kỳ phần mềm hay thư viện lạ nào):
@@ -51,9 +66,31 @@ Hệ thống sẽ tự động gửi luật chơi chuẩn xác đến từng tr�
 
 ---
 
-## 🛠️ Bảng lệnh cầm tay (Cheat Sheet)
+## ⚡ Bộ lệnh siêu ngắn (Short Command Reference)
 
-Mọi thao tác hàng ngày đều thông qua chiếc điều khiển ngắn gọn `python .agents/board.py`:
+Không cần nhớ đường dẫn thư mục sâu dòng làm gì, tất cả chỉ cần gõ qua **1 cửa ngõ duy nhất** `python .agents/board.py`:
+
+```bash
+# 📋 Bảng việc
+python .agents/board.py task list                      # Xem toàn bộ bảng việc
+python .agents/board.py task create --id T01 --title "X" # Tạo một việc mới
+python .agents/board.py task move T01 in_progress      # Nhận việc làm
+python .agents/board.py task move T01 review           # Nộp bài đi soi
+python .agents/board.py task move T01 done             # Nghiệm thu xong
+python .agents/board.py task reject T01 --reason "Lỗi" # Bắt làm lại
+
+# 🏃 Gậy tiếp sức
+python .agents/board.py baton status                   # Xem ai đang giữ gậy
+python .agents/board.py baton pass mason --task-id T01 # Chuyền cho thợ code
+python .agents/board.py baton pass reviewer            # Chuyền cho thợ soi
+python .agents/board.py baton recover                  # Giành lại gậy khẩn cấp
+
+# 🔔 Trọng tài & Phân vai
+python .agents/board.py watch                          # Bật chuông theo dõi bảng việc
+python .agents/board.py roster --sync                  # Nạp lại luật chơi cho các AI
+```
+
+### Chi tiết các lệnh cầm tay khi cần:
 
 ### 🏃 Chuyền gậy làm việc
 ```bash
