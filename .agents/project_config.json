@@ -1,0 +1,9 @@
+{
+  "ui": {
+    "mode": "minimal-default",
+    "profile": "minimal-neutral-v1",
+    "adapter": "plain-css",
+    "tokenSource": "docs/ui/profiles/minimal-neutral.tokens.json",
+    "componentRoot": "src/components/ui"
+  }
+}
